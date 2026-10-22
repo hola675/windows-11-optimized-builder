@@ -1,43 +1,26 @@
-# Windows 11 Optimized Builder
+# Windows 11 Optimized Builder V1
 
-Safety-first, reproducible custom Windows 11 media for programming and office work.
+A Windows-hosted builder for a conservative, developer/office-oriented Windows 11 image, based on the source project supplied for this repository.
 
-> **Status: Phase 0 — scaffold only.** No ISO has been built or certified. This project does not distribute Windows files; use an original ISO obtained directly from Microsoft.
+> **Build status:** the V1 source bundle is available separately for download, but this repository's PR currently contains the scaffold and validation workflow. Do not treat the PR branch alone as a runnable builder until the source files are integrated. No Windows ISO is included or distributed.
 
-## Goals
-- Balanced performance, compatibility, security and repairability.
-- Preserve Windows Update, Defender, Store, App Installer/winget, Terminal, PowerShell, WebView2, DISM/SFC, recovery, networking, VPN, WMI, Task Scheduler and servicing.
-- Make removals explicit, reviewable and tested.
-- Keep logs, build manifests and validation results.
+## V1 profile
+- Removes a bounded set of consumer/promotion apps.
+- Preserves Windows Update, Defender, Store, App Installer/winget, Terminal, PowerShell, WebView2, servicing, recovery, networking, printing and Bluetooth.
+- Hardware requirement bypass is opt-in only.
+- OneDrive sync blocking is opt-in only.
+- Does not disable `dmwappushservice` or alter undocumented Windows Update Orchestrator completion flags.
+- Never uses DISM `/ResetBase`.
 
-## Current status
-- [x] Initialize repository and safety policy
-- [x] Add developer profile manifest and non-destructive preflight
-- [ ] Audit supplied source code and licensing
-- [ ] Add Windows-hosted PowerShell tests
-- [ ] Validate in disposable VMs before release
+## Download and run
+Download the complete source bundle from the conversation attachment named **windows-11-optimized-builder-v1.zip**. Extract the entire ZIP to a local folder, obtain an original Windows 11 24H2/25H2 ISO directly from Microsoft, and double-click `LAUNCH_TINY11.bat`. Windows will request administrator elevation. Select the source ISO and edition in the GUI.
 
-## Requirements
-- Windows host and PowerShell 5.1 or a supported version
-- Administrator privileges for servicing
-- Windows ADK Deployment Tools / compatible DISM
-- Original Windows 11 ISO from Microsoft
-- At least 25 GB free scratch space
+Requirements: Windows PowerShell 5.1, administrator privileges, compatible Windows 11 DISM (10.0.26100+), and at least 20 GB free scratch space (40 GB recommended). If a compatible DISM is not available on the host, install Windows ADK Deployment Tools.
 
-## Preflight
-Run PowerShell as Administrator:
-```powershell
-Set-ExecutionPolicy -Scope Process Bypass
-.\scripts\Test-BuildEnvironment.ps1 -IsoPath "C:\ISO\Win11.iso"
-```
-This check does not modify Windows or create an ISO.
+## Validation status
+Static source checks are included in the bundle, but Windows-host execution, ISO bootability, feature-update and installed-system VM tests have not been run in this environment. Always test the resulting ISO in a disposable VM before physical installation.
 
-## Principles
-1. Measure before removing; fewer processes does not automatically mean better performance.
-2. Prefer supported policy/configuration to deleting system components.
-3. Fail closed on missing tools, insufficient space or failed DISM operations.
-4. Do not promise "zero telemetry" without evidence.
-5. Do not bypass hardware/security requirements by default.
-6. Never commit ISOs, mounted images, credentials or sensitive logs.
+## Project safety
+Never commit ISO/WIM/ESD payloads, mounted images, credentials or sensitive logs. No "zero telemetry" guarantee is made; privacy settings reduce selected consumer/diagnostic features but cannot prove all outbound communication is eliminated.
 
-See [scope](docs/00-PROJECT-SCOPE.md), [safe defaults](docs/05-V2-SAFE-DEFAULTS.md), and [roadmap](docs/04-BACKLOG.md).
+See [project scope](docs/00-PROJECT-SCOPE.md), [safe defaults](docs/05-V2-SAFE-DEFAULTS.md), and [roadmap](docs/04-BACKLOG.md).
