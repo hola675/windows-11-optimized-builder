@@ -35,8 +35,9 @@ try {
     $freeGB = [math]::Round($driveInfo.AvailableFreeSpace / 1GB, 2)
     if ($driveInfo.AvailableFreeSpace -lt 25GB) { Stop-Preflight "Insufficient free space on $root ($freeGB GB); 25 GB minimum." }
 
-    $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator
-    )
+    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = [Security.Principal.WindowsPrincipal]::new($identity)
+    $isAdmin = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
     if (-not $isAdmin) { Stop-Preflight 'Run PowerShell as Administrator before image servicing.' }
 
     [pscustomobject]@{
