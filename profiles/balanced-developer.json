@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "profile": "balanced-developer",
+  "status": "experimental",
+  "description": "Conservative developer and office profile; no unsupported servicing or security removals.",
+  "removeAppxPackageIds": [],
+  "preserveCapabilities": ["WindowsUpdate", "MicrosoftDefender", "MicrosoftStore", "AppInstaller", "winget", "WindowsTerminal", "PowerShell", "WebView2", "DISM", "SFC", "WinRE", "WMI", "TaskScheduler", "Networking", "VPN", "Printing", "Bluetooth", "CredentialManager"],
+  "privacy": { "claimZeroTelemetry": false, "applyUnverifiedRegistryTweaks": false },
+  "hardwareRequirementBypass": false,
+  "requiresVmValidationBeforeRelease": true
+}
