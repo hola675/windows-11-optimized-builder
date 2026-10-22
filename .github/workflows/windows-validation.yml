@@ -1,0 +1,47 @@
+name: Windows validation
+
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate profile JSON
+        shell: pwsh
+        run: |
+          $profile = Get-Content -Raw profiles/balanced-developer.json | ConvertFrom-Json
+          if ($profile.profile -ne 'balanced-developer') { throw 'Unexpected profile name' }
+          if ($profile.hardwareRequirementBypass -ne $false) { throw 'Hardware bypass must remain off by default' }
+          if ($profile.privacy.claimZeroTelemetry -ne $false) { throw 'Cannot claim zero telemetry by default' }
+          $required = @('WindowsUpdate','MicrosoftDefender','MicrosoftStore','AppInstaller','winget','PowerShell','DISM','SFC','WinRE')
+          foreach ($capability in $required) {
+            if ($profile.preserveCapabilities -notcontains $capability) { throw "Missing protected capability: $capability" }
+          }
+      - name: Parse PowerShell scripts
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem -Recurse -Filter *.ps1
+          foreach ($file in $files) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($file.FullName, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count) {
+              $errors | ForEach-Object { Write-Error "$($file.FullName): $($_.Message)" }
+              throw "PowerShell parse errors found."
+            }
+          }
+      - name: Confirm build source is present
+        shell: pwsh
+        run: |
+          if (-not (Test-Path tiny11maker.ps1)) {
+            Write-Host 'The audited Tiny11 Maker source has not yet been imported; ISO-build tests are intentionally skipped.'
+            "SOURCE_IMPORTED=false" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          } else {
+            "SOURCE_IMPORTED=true" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          }
